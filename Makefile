@@ -1,4 +1,5 @@
 CFLAGS += -g
+CFLAGS += -Wall
 CFLAGS += -Dctry_PTHREAD
 CFLAGS += -I.
 CFLAGS += -pthread

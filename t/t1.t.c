@@ -169,7 +169,7 @@ static void uncaught(ctry_exc_t *exc, void *data)
 }
 static void t6()
 {
-  int body_end = 0, catch = 0, finally = 0;
+  int catch = 0, finally = 0;
 
   ctry_thread_current()->uncaught = uncaught;
   ctry_thread_current()->uncaught_data = t6;

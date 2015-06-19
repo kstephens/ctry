@@ -30,7 +30,7 @@ void ctry_uncaught_default(ctry_exc_t *exc, void *data)
   FILE *out = stderr;
   void *thr = 0;
 #if ctry_PTHREAD
-  thr = pthread_self();
+  thr = (void*) pthread_self();
 #endif
   fflush(out);
   fprintf(out, "\n  ctry: thr %p: UNCAUGHT: %d: raised at %s:%d %s\n",
@@ -160,8 +160,9 @@ void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...)
   exc.data_n = data_n;
   {
     va_list va;
+    int i;
     va_start(va, data_n);
-    for ( int i = 0; i < data_n; ++ i )
+    for ( i = 0; i < data_n; ++ i )
       exc.data[i] = va_arg(va, void*);
     va_end(va);
   }
