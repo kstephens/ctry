@@ -57,7 +57,7 @@ ctry_thread_t *ctry_thread_current()
   X._func = func;
 #define ctry_SET_CONTEXT(NAME) ctry_SET_CONTEXT_(t->NAME)
 
-void ctry_begin__(ctry_CONTEXT_PARAMS, ctry_t *t)
+void ctry_begin__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
   memset(t, 0, sizeof(*t));
@@ -100,14 +100,14 @@ void ctry_do_finally(ctry_t *t)
   }
 }
 
-void ctry_body__(ctry_CONTEXT_PARAMS, ctry_t *t)
+void ctry_body__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
   t->_body = 1;
   ctry_SET_CONTEXT(_body_at);
 }
 
-void ctry_raise__(ctry_CONTEXT_PARAMS, int e, int data_n, ...)
+void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...)
 {
   ctry_exc_t exc = { 0 };
   assert(e > 0);
@@ -126,7 +126,7 @@ void ctry_raise__(ctry_CONTEXT_PARAMS, int e, int data_n, ...)
   ctry_raise_exc(&exc);
 }
 
-void ctry_catch__(ctry_CONTEXT_PARAMS, ctry_t *t, int e)
+void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t, int e)
 {
   assert(t);
   assert(e == t->_exc._e);
@@ -142,7 +142,7 @@ ctry_exc_t *ctry_exc()
   return &curr->_exc;
 }
 
-void ctry_finally__(ctry_CONTEXT_PARAMS, ctry_t *t)
+void ctry_finally__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
   t->_finally = 1;
@@ -151,7 +151,7 @@ void ctry_finally__(ctry_CONTEXT_PARAMS, ctry_t *t)
   t->_again = 0;
 }
 
-void ctry_end__(ctry_CONTEXT_PARAMS, ctry_t *t)
+void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
   assert(t->_begin == 1);
@@ -165,7 +165,7 @@ void ctry_end__(ctry_CONTEXT_PARAMS, ctry_t *t)
   }
 }
 
-int ctry_again__(ctry_CONTEXT_PARAMS, ctry_t *t)
+int ctry_again__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   ctry_do_finally(t);
   return t->_again;
