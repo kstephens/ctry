@@ -30,8 +30,8 @@ void ctry_uncaught_default(ctry_exc_t *exc, void *data)
   fflush(out);
   fprintf(out, "\n  ctry: thr %p: UNCAUGHT: %d: raised at %s:%d %s\n",
           thr,
-          (int) exc->_e,
-          exc->_cntx._file, exc->_cntx._line, exc->_cntx._func);
+          (int) exc->e,
+          exc->cntx.file, exc->cntx.line, exc->cntx.func);
   fflush(out);
 }
 
@@ -70,10 +70,10 @@ ctry_thread_t *ctry_thread_current()
   return thr;
 }
 
-#define ctry_SET_CONTEXT_(X)                \
-  X._file = file;                         \
-  X._line = line;                         \
-  X._func = func;
+#define ctry_SET_CONTEXT_(X)             \
+  X.file = file;                         \
+  X.line = line;                         \
+  X.func = func;
 #define ctry_SET_CONTEXT(NAME) ctry_SET_CONTEXT_(t->NAME)
 
 void ctry_begin__(ctry_CONTEXT_PARAMS ctry_t *t)
@@ -92,7 +92,7 @@ void ctry_raise_exc(ctry_exc_t *exc)
 {
   ctry_t* t = ctry_thread_current()->curr;
   assert(exc);
-  assert(exc->_e > 0);
+  assert(exc->e > 0);
   if ( ! t ) {
     ctry_thread_t *thr = ctry_thread_current();
     (thr->uncaught ? thr->uncaught : ctry_uncaught_default)(exc, thr->uncaught_data);
@@ -104,8 +104,8 @@ void ctry_raise_exc(ctry_exc_t *exc)
   t->_exc = *exc;
 
   t->_raise = 1;
-  t->_raise_at = exc->_cntx;
-  t->_state = t->_exc._e;
+  t->_raise_at = exc->cntx;
+  t->_state = t->_exc.e;
   t->_exc_pending = 1;
   longjmp(t->_jb, 1);
 }
@@ -132,14 +132,14 @@ void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...)
   assert(e > 0);
   assert(data_n >= 0);
   assert(data_n < 4);
-  exc._e = e;
-  ctry_SET_CONTEXT_(exc._cntx);
-  exc._data_n = data_n;
+  exc.e = e;
+  ctry_SET_CONTEXT_(exc.cntx);
+  exc.data_n = data_n;
   {
     va_list va;
     va_start(va, data_n);
     for ( int i = 0; i < data_n; ++ i )
-      exc._data[i] = va_arg(va, void*);
+      exc.data[i] = va_arg(va, void*);
     va_end(va);
   }
   ctry_raise_exc(&exc);
@@ -148,7 +148,7 @@ void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...)
 void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
-  assert(t->_exc._e > 0);
+  assert(t->_exc.e > 0);
   t->_catch = 1;
   ctry_SET_CONTEXT(_catch_at);
   t->_exc_pending = 0;

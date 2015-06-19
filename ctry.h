@@ -4,16 +4,16 @@
 #include <setjmp.h>
 
 typedef struct ctry_context_t {
-  const char *_file;
-  int _line;
-  const char *_func;
+  const char *file;
+  int line;
+  const char *func;
 } ctry_context_t;
 
 typedef struct ctry_exc_t {
-  int _e;
-  void *_data[4];
-  int _data_n;
-  ctry_context_t _cntx;
+  int e;
+  void *data[4];
+  int data_n;
+  ctry_context_t cntx;
 } ctry_exc_t;
 
 typedef struct ctry_t {
