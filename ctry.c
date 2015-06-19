@@ -145,10 +145,10 @@ void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...)
   ctry_raise_exc(&exc);
 }
 
-void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t, int e)
+void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
-  assert(e == t->_exc._e);
+  assert(t->_exc._e > 0);
   t->_catch = 1;
   ctry_SET_CONTEXT(_catch_at);
   t->_exc_pending = 0;

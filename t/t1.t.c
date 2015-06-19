@@ -70,7 +70,7 @@ static void t3()
     ctry_CATCH(1) {
       catch = 1;
     }
-    ctry_CATCH(2) {
+    ctry_CATCH_ANY {
       catch = 2;
     }
   } ctry_END;

@@ -48,7 +48,7 @@ ctry_thread_t *ctry_thread_current();
 void ctry_begin__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_body__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...);
-void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t, int e);
+void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_finally__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t);
 int  ctry_again__(ctry_CONTEXT_PARAMS ctry_t *t);
@@ -72,7 +72,12 @@ do {                                                         \
 #define ctry_CATCH_(N,E)                                     \
     break;                                                   \
     case E:                                                  \
-      ctry_catch__(ctry_CONTEXT_ARGS &_ctry_##N, (E));
+      ctry_catch__(ctry_CONTEXT_ARGS &_ctry_##N);
+
+#define ctry_CATCH_ANY_(N)                                   \
+    break;                                                   \
+    default:                                                 \
+      ctry_catch__(ctry_CONTEXT_ARGS &_ctry_##N);
 
 #define ctry_FINALLY_(N)                                     \
     break;                                                   \
@@ -88,6 +93,7 @@ do {                                                         \
 #define ctry_BEGIN     ctry_BEGIN_(_here)
 #define ctry_BODY      ctry_BODY_(_here)
 #define ctry_CATCH(E)  ctry_CATCH_(_here, (E))
+#define ctry_CATCH_ANY ctry_CATCH_ANY_(_here)
 #define ctry_FINALLY   ctry_FINALLY_(_here)
 #define ctry_END       ctry_END_(_here)
 
