@@ -37,6 +37,7 @@ typedef struct ctry_thread_t {
   ctry_t *curr;
   void (*uncaught)(ctry_exc_t *exc, void *data);
   void *uncaught_data;
+  void (*abort)();
 } ctry_thread_t;
 
 extern ctry_thread_t ctry_thread_defaults;

@@ -12,7 +12,7 @@ p:
 	@echo '$(v)=$($(v))'
 
 test: $(TESTS)
-	set -xe; for t in $(TESTS); do $$t; done
+	@set -xe; for t in $(TESTS); do $$t; done
 
 debug: t/t1.t
 	lldb t/t1.t

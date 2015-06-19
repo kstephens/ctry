@@ -4,8 +4,8 @@
 #include <assert.h>
 #include <stdio.h>
 
-// #define AT() printf("\n  at %s %s:%d\n", __FUNCTION__, __FILE__, __LINE__)
-#define AT() (void) 0
+#define AT() printf("\n  at %s %s:%d\n", __FUNCTION__, __FILE__, __LINE__)
+// #define AT() (void) 0
 
 static void t1()
 {
@@ -116,7 +116,6 @@ static void t4()
 
 static void t5t()
 {
-  AT();
   ctry_raise(2, 0);
   assert(! "reached");
 }
@@ -126,15 +125,12 @@ static void t5h()
 {
   ctry_BEGIN {
     ctry_BODY {
-      AT();
       t5t();
     }
     ctry_CATCH(1) {
-      AT();
       t5h_catch = 1;
     }
     ctry_FINALLY {
-      AT();
       t5h_finally = 1;
     }
   } ctry_END;
@@ -146,16 +142,13 @@ static void t5()
 
   ctry_BEGIN {
     ctry_BODY {
-      AT();
       t5h();
       assert(! "reached");
     }
     ctry_CATCH(2) {
-      AT();
       catch = 2;
     }
     ctry_FINALLY {
-      AT();
       finally = 1;
     }
   } ctry_END;
@@ -180,16 +173,13 @@ static void t6()
 
   ctry_BEGIN {
     ctry_BODY {
-      AT();
       ctry_raise(1, 0);
       assert(! "reached");
     }
     ctry_CATCH(2) {
-      AT();
       catch = 2;
     }
     ctry_FINALLY {
-      AT();
       finally = 1;
     }
   } ctry_END;
@@ -199,21 +189,36 @@ static void t6()
 }
 
 #ifdef ctry_PTHREAD
+static int thr1_finally, thr2_finally;
 static void* thr1_f(void *data)
 {
-  ctry_raise(1, 0);
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_raise(1, 0);
+    }
+    ctry_FINALLY {
+      thr1_finally = 1;
+    }
+  } ctry_END;
   return thr1_f;
 }
 
 static void* thr2_f(void *data)
 {
-  ctry_raise(2, 0);
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_raise(2, 0);
+    }
+    ctry_FINALLY {
+      thr2_finally = 1;
+    }
+  } ctry_END;
   return thr2_f;
 }
 
 static void test_pthread_isolation()
 {
-  pthread_t thr1, thr2;;
+  pthread_t thr1, thr2;
   void *thr1_v = 0, *thr2_v = 0;
   ctry_BEGIN {
     ctry_BODY {
@@ -227,15 +232,16 @@ static void test_pthread_isolation()
   } ctry_END;
   assert(thr1_v == thr1_f);
   assert(thr2_v == thr2_f);
+  assert(thr1_finally == 1);
+  assert(thr2_finally == 1);
 }
 #endif
 
-#define T(N) printf("test: %s ...\n", #N); N (); printf("test: %s: OK\n", #N)
+#define T(N) printf("%s %s ...\n", argv[0], #N); N (); printf("%s %s  OK\n", argv[0], #N)
 int main(int argc, char **argv)
 {
   T(t1);
   T(t2);
-  T(t3);
   T(t3);
   T(t4);
   T(t5);

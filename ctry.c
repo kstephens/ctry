@@ -10,19 +10,8 @@
 #include <signal.h>
 #endif
 
-void ctry_uncaught_default(ctry_exc_t *exc, void *data)
+void ctry_abort()
 {
-  FILE *out = stderr;
-  void *thr = 0;
-#if ctry_PTHREAD
- thr = pthread_self();
-#endif
-  fflush(out);
-  fprintf(out, "\nctry: thr %p: UNCAUGHT: %d: raised at %s:%d %s\n",
-          thr,
-          (int) exc->_e,
-          exc->_cntx._file, exc->_cntx._line, exc->_cntx._func);
-  fflush(out);
 #if ctry_PTHREAD
   // pthread_kill(pthread_self(), SIGABRT);
   pthread_cancel(pthread_self());
@@ -31,9 +20,25 @@ void ctry_uncaught_default(ctry_exc_t *exc, void *data)
 #endif
 }
 
+void ctry_uncaught_default(ctry_exc_t *exc, void *data)
+{
+  FILE *out = stderr;
+  void *thr = 0;
+#if ctry_PTHREAD
+ thr = pthread_self();
+#endif
+  fflush(out);
+  fprintf(out, "\n  ctry: thr %p: UNCAUGHT: %d: raised at %s:%d %s\n",
+          thr,
+          (int) exc->_e,
+          exc->_cntx._file, exc->_cntx._line, exc->_cntx._func);
+  fflush(out);
+}
+
 ctry_thread_t ctry_thread_defaults = {
   0,
   ctry_uncaught_default,
+  ctry_abort,
 };
 
 #if ctry_PTHREAD
