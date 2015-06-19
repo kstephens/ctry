@@ -1,5 +1,5 @@
 CFLAGS += -g
-CFLAGS += -Dtry_PTHREAD
+CFLAGS += -Dctry_PTHREAD
 CFLAGS += -I.
 CFLAGS += -pthread
 

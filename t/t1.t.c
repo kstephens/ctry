@@ -1,8 +1,11 @@
 #define ctry_PTHREAD 1
 #include "ctry.h"
-#include "ctry.c"
 #include <assert.h>
 #include <stdio.h>
+#if ctry_PTHREAD
+#include <pthread.h>
+#include <signal.h>
+#endif
 
 #define AT() printf("\n  at %s %s:%d\n", __FUNCTION__, __FILE__, __LINE__)
 // #define AT() (void) 0
@@ -268,3 +271,5 @@ int main(int argc, char **argv)
 #endif
   return 0;
 }
+
+#include "ctry.c"

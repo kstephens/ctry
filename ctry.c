@@ -10,7 +10,7 @@
 #include <signal.h>
 #endif
 
-void ctry_abort()
+void ctry_abort_default()
 {
 #if ctry_PTHREAD
   // pthread_kill(pthread_self(), SIGABRT);
@@ -20,12 +20,17 @@ void ctry_abort()
 #endif
 }
 
+void ctry_abort()
+{
+  ctry_thread_current()->abort();
+}
+
 void ctry_uncaught_default(ctry_exc_t *exc, void *data)
 {
   FILE *out = stderr;
   void *thr = 0;
 #if ctry_PTHREAD
- thr = pthread_self();
+  thr = pthread_self();
 #endif
   fflush(out);
   fprintf(out, "\n  ctry: thr %p: UNCAUGHT: %d: raised at %s:%d %s\n",
@@ -33,12 +38,14 @@ void ctry_uncaught_default(ctry_exc_t *exc, void *data)
           (int) exc->e,
           exc->cntx.file, exc->cntx.line, exc->cntx.func);
   fflush(out);
+  ctry_abort();
 }
 
 ctry_thread_t ctry_thread_defaults = {
   0,
   ctry_uncaught_default,
-  ctry_abort,
+  0,
+  ctry_abort_default,
 };
 
 #if ctry_PTHREAD
@@ -61,6 +68,7 @@ ctry_thread_t *ctry_thread_current()
   ctry_thread_init();
   if ( ! (thr = pthread_getspecific(thread_key)) ) {
     thr = malloc(sizeof(*thr));
+    assert(thr);
     *thr = ctry_thread_defaults;
     pthread_setspecific(thread_key, thr);
   }
@@ -69,6 +77,21 @@ ctry_thread_t *ctry_thread_current()
 #endif
   return thr;
 }
+
+void _ctry_assert_failed(ctry_CONTEXT_PARAMS const char *expr)
+{
+  FILE *out = stderr;
+  fflush(out);
+  fprintf(out, "\n  ctry_assert(%s) %s:%d %s\n", expr, file, line, func);
+  fflush(out);
+  ctry_abort();
+}
+
+#ifdef assert
+#undef assert
+#endif
+#define assert(X) \
+  do { if ( ! (X) ) _ctry_assert_failed(ctry_CONTEXT_ARGS #X); } while(0)
 
 #define ctry_SET_CONTEXT_(X)             \
   X.file = file;                         \
