@@ -1,4 +1,4 @@
-#define try_PTHREAD 1
+#define ctry_PTHREAD 1
 #include "ctry.h"
 #include "ctry.c"
 #include <assert.h>
@@ -198,6 +198,38 @@ static void t6()
   assert(uncaught_data == t6);
 }
 
+#ifdef ctry_PTHREAD
+static void* thr1_f(void *data)
+{
+  ctry_raise(1, 0);
+  return thr1_f;
+}
+
+static void* thr2_f(void *data)
+{
+  ctry_raise(2, 0);
+  return thr2_f;
+}
+
+static void test_pthread_isolation()
+{
+  pthread_t thr1, thr2;;
+  void *thr1_v = 0, *thr2_v = 0;
+  ctry_BEGIN {
+    ctry_BODY {
+      assert(! pthread_create(&thr1, 0, thr1_f, 0));
+      assert(! pthread_create(&thr2, 0, thr2_f, 0));
+    }
+    ctry_FINALLY {
+      assert(! pthread_join(thr1, &thr1_v));
+      assert(! pthread_join(thr2, &thr2_v));
+    }
+  } ctry_END;
+  assert(thr1_v == thr1_f);
+  assert(thr2_v == thr2_f);
+}
+#endif
+
 #define T(N) printf("test: %s ...\n", #N); N (); printf("test: %s: OK\n", #N)
 int main(int argc, char **argv)
 {
@@ -208,5 +240,8 @@ int main(int argc, char **argv)
   T(t4);
   T(t5);
   T(t6);
+#if ctry_PTHREAD
+  T(test_pthread_isolation);
+#endif
   return 0;
 }

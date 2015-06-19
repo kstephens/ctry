@@ -1,6 +1,7 @@
 CFLAGS += -g
 CFLAGS += -Dtry_PTHREAD
 CFLAGS += -I.
+CFLAGS += -pthread
 
 default: test
 

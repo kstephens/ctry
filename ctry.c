@@ -7,14 +7,28 @@
 
 #if ctry_PTHREAD
 #include <pthread.h>
+#include <signal.h>
 #endif
 
 void ctry_uncaught_default(ctry_exc_t *exc, void *data)
 {
-  fprintf(stderr, "\ntsy: UNCAUGHT: %d: raised at %s:%d %s\n",
+  FILE *out = stderr;
+  void *thr = 0;
+#if ctry_PTHREAD
+ thr = pthread_self();
+#endif
+  fflush(out);
+  fprintf(out, "\nctry: thr %p: UNCAUGHT: %d: raised at %s:%d %s\n",
+          thr,
           (int) exc->_e,
           exc->_cntx._file, exc->_cntx._line, exc->_cntx._func);
+  fflush(out);
+#if ctry_PTHREAD
+  // pthread_kill(pthread_self(), SIGABRT);
+  pthread_cancel(pthread_self());
+#else
   abort();
+#endif
 }
 
 ctry_thread_t ctry_thread_defaults = {
