@@ -1,4 +1,5 @@
 CFLAGS += -g
+CFLAGS += -Dtry_PTHREAD
 
 default: test-try.t.i test
 

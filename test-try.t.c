@@ -1,3 +1,4 @@
+#define try_PTHREAD 1
 #include "try.h"
 #include <assert.h>
 #include <stdio.h>
@@ -173,8 +174,8 @@ static void t6()
 {
   int body_end = 0, catch = 0, finally = 0;
 
-  try_uncaught = uncaught;
-  try_uncaught_data = t6;
+  try_thread_current()->uncaught = uncaught;
+  try_thread_current()->uncaught_data = t6;
 
   try_BEGIN {
     try_BODY {

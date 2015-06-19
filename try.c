@@ -5,19 +5,50 @@
 #include <stdio.h>
 #include <assert.h>
 
-static try_t *curr; /* NOT THREAD-SAFE */
+#if try_PTHREAD
+#include <pthread.h>
+#endif
 
-int try_stop;
-
-void try_debug_stop_at()
+void try_uncaught_default(try_exc_t *exc, void *data)
 {
-  fprintf(stderr, "\ntry_debug_stop_at()\n");
+  fprintf(stderr, "\ntsy: UNCAUGHT: %d: raised at %s:%d %s\n",
+          (int) exc->_e,
+          exc->_cntx._file, exc->_cntx._line, exc->_cntx._func);
+  abort();
 }
 
-void try_stop_at()
+try_thread_t try_thread_defaults = {
+  0,
+  try_uncaught_default,
+};
+
+#if try_PTHREAD
+static pthread_once_t once_control = PTHREAD_ONCE_INIT;
+static pthread_key_t thread_key;
+static void thread_init_func()
 {
-  if ( try_stop )
-    try_debug_stop_at();
+  assert(pthread_key_create(&thread_key, free) == 0);
+}
+static void try_thread_init()
+{
+  assert(pthread_once(&once_control, thread_init_func) == 0);
+}
+#endif
+
+try_thread_t *try_thread_current()
+{
+  try_thread_t *thr = 0;
+#if try_PTHREAD
+  try_thread_init();
+  if ( ! (thr = pthread_getspecific(thread_key)) ) {
+    thr = malloc(sizeof(*thr));
+    *thr = try_thread_defaults;
+    pthread_setspecific(thread_key, thr);
+  }
+#else
+  thr = &try_thread_defaults;
+#endif
+  return thr;
 }
 
 #define try_SET_CONTEXT_(X)                \
@@ -33,29 +64,19 @@ void try_begin__(try_CONTEXT_PARAMS, try_t *t)
   t->_jmpcode = -1;
   t->_begin = 1;
   try_SET_CONTEXT(_begin_at);
-  t->_prev = curr;
-  curr = t;
+  try_thread_t *thr = try_thread_current();
+  t->_prev = thr->curr;
+  thr->curr = t;
 }
-
-void try_uncaught_default(try_exc_t *exc, void *data)
-{
-  fprintf(stderr, "\ntsy: UNCAUGHT: %d: raised at %s:%d %s\n",
-          (int) exc->_e,
-          exc->_cntx._file, exc->_cntx._line, exc->_cntx._func);
-  abort();
-}
-
-void (*try_uncaught)(try_exc_t *exc, void *data) = try_uncaught_default;
-void *try_uncaught_data;
 
 void try_raise_exc(try_exc_t *exc)
 {
-  try_t* t = curr;
-  try_stop_at();
+  try_t* t = try_thread_current()->curr;
   assert(exc);
   assert(exc->_e > 0);
   if ( ! t ) {
-    (try_uncaught ? try_uncaught : try_uncaught_default)(exc, try_uncaught_data);
+    try_thread_t *thr = try_thread_current();
+    (thr->uncaught ? thr->uncaught : try_uncaught_default)(exc, thr->uncaught_data);
     return;
   }
   assert(t->_begin == 1);
@@ -116,6 +137,7 @@ void try_catch__(try_CONTEXT_PARAMS, try_t *t, int e)
 
 try_exc_t *try_exc()
 {
+  try_t *curr = try_thread_current()->curr;
   assert(curr);
   return &curr->_exc;
 }
@@ -136,7 +158,7 @@ void try_end__(try_CONTEXT_PARAMS, try_t *t)
   assert(t->_end   == 0);
   t->_end = 1;
   try_SET_CONTEXT(_end_at);
-  curr = t->_prev;
+  try_thread_current()->curr = t->_prev;
   if ( t->_exc_pending ) {
     t->_exc_pending = 0;
     try_raise_exc(&t->_exc);

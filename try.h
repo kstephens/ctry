@@ -33,10 +33,14 @@ typedef struct try_t {
   try_context_t _begin_at, _body_at, _raise_at, _catch_at, _finally_at, _end_at;
 } try_t;
 
-extern int try_stop;
+typedef struct try_thread_t {
+  try_t *curr;
+  void (*uncaught)(try_exc_t *exc, void *data);
+  void *uncaught_data;
+} try_thread_t;
 
-extern void (*try_uncaught)(try_exc_t *exc, void *data);
-extern void *try_uncaught_data;
+extern try_thread_t try_thread_defaults;
+try_thread_t *try_thread_current();
 
 #define try_CONTEXT_PARAMS const char *file, int line, const char *func
 #define try_CONTEXT_ARGS   __FILE__, __LINE__, __FUNCTION__
