@@ -1,5 +1,6 @@
 #define try_PTHREAD 1
-#include "try.h"
+#include "ctry.h"
+#include "ctry.c"
 #include <assert.h>
 #include <stdio.h>
 

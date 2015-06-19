@@ -1,21 +1,22 @@
 CFLAGS += -g
 CFLAGS += -Dtry_PTHREAD
+CFLAGS += -I.
 
-default: test-try.t.i test
+default: test
 
-test: test-try.t
-	./test-try.t
+TESTS_C:=$(shell ls t/*.t.c)
+TESTS:=$(TESTS_C:.c=)
 
-debug: test-try.t
-	lldb ./test-try.t
+p:
+	@echo '$(v)=$($(v))'
 
-try.o : try.c try.h
+test: $(TESTS)
+	set -xe; for t in $(TESTS); do $$t; done
 
-test-try.t: test-try.t.c try.o
-	$(CC) $(CFLAGS) test-try.t.c -o $@ try.o
+debug: t/t1.t
+	lldb t/t1.t
 
-test-try.t.i: test-try.t.c try.h
-	$(CC) $(CFLAGS) -E test-try.t.c -o $@
+ctry.o : ctry.c ctry.h
 
 clean:
-	rm -f *.o *.i *.t
+	rm -f *.o *.i t/*.t
