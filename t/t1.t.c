@@ -188,6 +188,22 @@ static void t6()
   assert(uncaught_data == t6);
 }
 
+static void test_catch_all_wo_raise()
+{
+  int catch = 0;
+
+  ctry_BEGIN {
+    ctry_BODY {
+    }
+    ctry_CATCH_ANY {
+      catch = 1;
+    }
+  } ctry_END;
+
+  assert(catch == 0);
+}
+
+
 #ifdef ctry_PTHREAD
 static int thr1_finally, thr2_finally;
 static void* thr1_f(void *data)
@@ -246,6 +262,7 @@ int main(int argc, char **argv)
   T(t4);
   T(t5);
   T(t6);
+  T(test_catch_all_wo_raise);
 #if ctry_PTHREAD
   T(test_pthread_isolation);
 #endif

@@ -77,6 +77,7 @@ do {                                                         \
 #define ctry_CATCH_ANY_(N)                                   \
     break;                                                   \
     default:                                                 \
+      if ( _ctry_##N._state == -1 ) break;                   \
       ctry_catch__(ctry_CONTEXT_ARGS &_ctry_##N);
 
 #define ctry_FINALLY_(N)                                     \
