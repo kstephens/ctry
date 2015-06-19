@@ -1,25 +1,25 @@
-#ifndef _try_h_
-#define _try_h_
+#ifndef _ctry_h_
+#define _ctry_h_
 
 #include <setjmp.h>
 
-typedef struct try_context_t {
+typedef struct ctry_context_t {
   const char *_file;
   int _line;
   const char *_func;
-} try_context_t;
+} ctry_context_t;
 
-typedef struct try_exc_t {
+typedef struct ctry_exc_t {
   int _e;
   void *_data[4];
   int _data_n;
-  try_context_t _cntx;
-} try_exc_t;
+  ctry_context_t _cntx;
+} ctry_exc_t;
 
-typedef struct try_t {
+typedef struct ctry_t {
   int _jmpcode;
   jmp_buf _jb;
-  struct try_t *_prev;
+  struct ctry_t *_prev;
   int _state, _again;
   unsigned int
     _begin   : 1,
@@ -29,65 +29,66 @@ typedef struct try_t {
     _finally : 1,
     _end     : 1,
     _exc_pending : 1;
-  try_exc_t _exc;
-  try_context_t _begin_at, _body_at, _raise_at, _catch_at, _finally_at, _end_at;
-} try_t;
+  ctry_exc_t _exc;
+  ctry_context_t _begin_at, _body_at, _raise_at, _catch_at, _finally_at, _end_at;
+} ctry_t;
 
-typedef struct try_thread_t {
-  try_t *curr;
-  void (*uncaught)(try_exc_t *exc, void *data);
+typedef struct ctry_thread_t {
+  ctry_t *curr;
+  void (*uncaught)(ctry_exc_t *exc, void *data);
   void *uncaught_data;
-} try_thread_t;
+} ctry_thread_t;
 
-extern try_thread_t try_thread_defaults;
-try_thread_t *try_thread_current();
+extern ctry_thread_t ctry_thread_defaults;
+ctry_thread_t *ctry_thread_current();
 
-#define try_CONTEXT_PARAMS const char *file, int line, const char *func
-#define try_CONTEXT_ARGS   __FILE__, __LINE__, __FUNCTION__
-void try_begin__(try_CONTEXT_PARAMS, try_t *t);
-void try_body__(try_CONTEXT_PARAMS, try_t *t);
-void try_raise__(try_CONTEXT_PARAMS, int e, int data_n, ...);
-void try_catch__(try_CONTEXT_PARAMS, try_t *t, int e);
-void try_finally__(try_CONTEXT_PARAMS, try_t *t);
-void try_end__(try_CONTEXT_PARAMS, try_t *t);
-int  try_again__(try_CONTEXT_PARAMS, try_t *t);
-try_exc_t *try_exc();
+#define ctry_CONTEXT_PARAMS const char *file, int line, const char *func
+#define ctry_CONTEXT_ARGS   __FILE__, __LINE__, __FUNCTION__
+void ctry_begin__(ctry_CONTEXT_PARAMS, ctry_t *t);
+void ctry_body__(ctry_CONTEXT_PARAMS, ctry_t *t);
+void ctry_raise__(ctry_CONTEXT_PARAMS, int e, int data_n, ...);
+void ctry_catch__(ctry_CONTEXT_PARAMS, ctry_t *t, int e);
+void ctry_finally__(ctry_CONTEXT_PARAMS, ctry_t *t);
+void ctry_end__(ctry_CONTEXT_PARAMS, ctry_t *t);
+int  ctry_again__(ctry_CONTEXT_PARAMS, ctry_t *t);
+ctry_exc_t *ctry_exc();
 
-#define try_raise(E, D)                                      \
-  try_raise__(try_CONTEXT_ARGS, (E), (D))
+#define ctry_raise(E, D)                                     \
+  ctry_raise__(ctry_CONTEXT_ARGS, (E), (D))
 
-#define try_BEGIN_(N)                                        \
+#define ctry_BEGIN_(N)                                       \
 do {                                                         \
-  try_t _try_##N;                                            \
-  try_begin__(try_CONTEXT_ARGS, &_try_##N);                  \
-  _try_##N._jmpcode = setjmp(_try_##N._jb);                  \
+  ctry_t _ctry_##N;                                          \
+  ctry_begin__(ctry_CONTEXT_ARGS, &_ctry_##N);               \
+  _ctry_##N._jmpcode = setjmp(_ctry_##N._jb);                \
   do {                                                       \
-    _try_##N._again = 0;                                     \
-    switch ( _try_##N._state ) {
-#define try_BODY_(N)                                         \
+    _ctry_##N._again = 0;                                    \
+    switch ( _ctry_##N._state ) {
+#define ctry_BODY_(N)                                        \
     case 0:                                                  \
-      try_body__(try_CONTEXT_ARGS, &_try_##N);
+      ctry_body__(ctry_CONTEXT_ARGS, &_ctry_##N);
 
-#define try_CATCH_(N,E)                                      \
+#define ctry_CATCH_(N,E)                                     \
     break;                                                   \
     case E:                                                  \
-      try_catch__(try_CONTEXT_ARGS, &_try_##N, (E));
+      ctry_catch__(ctry_CONTEXT_ARGS, &_ctry_##N, (E));
 
-#define try_FINALLY_(N)                                      \
+#define ctry_FINALLY_(N)                                     \
     break;                                                   \
     case -1:                                                 \
-      try_finally__(try_CONTEXT_ARGS, &_try_##N);
+      ctry_finally__(ctry_CONTEXT_ARGS, &_ctry_##N);
 
-#define try_END_(N)                                          \
+#define ctry_END_(N)                                         \
     }                                                        \
-      } while ( try_again__(try_CONTEXT_ARGS, &_try_##N) );  \
-  try_end__(try_CONTEXT_ARGS, &_try_##N);                    \
+  } while ( ctry_again__(ctry_CONTEXT_ARGS, &_ctry_##N) );   \
+  ctry_end__(ctry_CONTEXT_ARGS, &_ctry_##N);                 \
 } while (0)
 
-#define try_BEGIN     try_BEGIN_(_here)
-#define try_BODY      try_BODY_(_here)
-#define try_CATCH(E)  try_CATCH_(_here, (E))
-#define try_FINALLY   try_FINALLY_(_here)
-#define try_END       try_END_(_here)
+#define ctry_BEGIN     ctry_BEGIN_(_here)
+#define ctry_BODY      ctry_BODY_(_here)
+#define ctry_CATCH(E)  ctry_CATCH_(_here, (E))
+#define ctry_FINALLY   ctry_FINALLY_(_here)
+#define ctry_END       ctry_END_(_here)
 
 #endif
+

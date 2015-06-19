@@ -11,17 +11,17 @@ static void t1()
 {
   int body = 0, catch = 0;
 
-  try_BEGIN {
-    try_BODY {
+  ctry_BEGIN {
+    ctry_BODY {
       body = 1;
     }
-    try_CATCH(1) {
+    ctry_CATCH(1) {
       catch = 1;
     }
-    try_CATCH(2) {
+    ctry_CATCH(2) {
       catch = 2;
     }
-  } try_END;
+  } ctry_END;
 
   assert(body == 1);
   assert(catch == 0);
@@ -31,49 +31,49 @@ static void t2()
 {
   int caught = 0;
 
-  try_BEGIN {
-    try_BODY {
-      try_raise(1, 0);
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_raise(1, 0);
       assert(! "reached");
     }
-    try_CATCH(1) {
+    ctry_CATCH(1) {
       caught = 1;
     }
-    try_CATCH(2) {
+    ctry_CATCH(2) {
       caught = 2;
     }
-  } try_END;
+  } ctry_END;
 
   assert(caught == 1);
 }
 
 static void t3h()
 {
-  try_BEGIN {
-    try_BODY {
-      try_raise(2, 0);
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_raise(2, 0);
       assert(! "reached");
     }
-    try_CATCH(3);
-  } try_END;
+    ctry_CATCH(3);
+  } ctry_END;
 }
 
 static void t3()
 {
   int catch = 0;
 
-  try_BEGIN {
-    try_BODY {
+  ctry_BEGIN {
+    ctry_BODY {
       t3h();
       assert(! "reached");
     }
-    try_CATCH(1) {
+    ctry_CATCH(1) {
       catch = 1;
     }
-    try_CATCH(2) {
+    ctry_CATCH(2) {
       catch = 2;
     }
-  } try_END;
+  } ctry_END;
 
   assert(catch == 2);
 }
@@ -82,32 +82,32 @@ static void t3()
 static int t4h_caught;
 static void t4h()
 {
-  try_BEGIN {
-    try_BODY {
-      try_raise(2, 0);
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_raise(2, 0);
       assert(! "reached");
     }
-    try_CATCH(2) {
+    ctry_CATCH(2) {
       t4h_caught = 2;
-      try_raise(1, 0);
+      ctry_raise(1, 0);
       assert(! "reached");
     }
-  } try_END;
+  } ctry_END;
 }
 
 static void t4()
 {
   int caught = 0;
 
-  try_BEGIN {
-    try_BODY {
+  ctry_BEGIN {
+    ctry_BODY {
       t4h();
       assert(! "reached");
     }
-    try_CATCH(1) {
+    ctry_CATCH(1) {
       caught = 1;
     }
-  } try_END;
+  } ctry_END;
 
   assert(t4h_caught == 2);
   assert(caught == 1);
@@ -117,48 +117,48 @@ static void t4()
 static void t5t()
 {
   AT();
-  try_raise(2, 0);
+  ctry_raise(2, 0);
   assert(! "reached");
 }
 
 static int t5h_catch, t5h_finally;
 static void t5h()
 {
-  try_BEGIN {
-    try_BODY {
+  ctry_BEGIN {
+    ctry_BODY {
       AT();
       t5t();
     }
-    try_CATCH(1) {
+    ctry_CATCH(1) {
       AT();
       t5h_catch = 1;
     }
-    try_FINALLY {
+    ctry_FINALLY {
       AT();
       t5h_finally = 1;
     }
-  } try_END;
+  } ctry_END;
 }
 
 static void t5()
 {
   int catch = 0, finally = 0;
 
-  try_BEGIN {
-    try_BODY {
+  ctry_BEGIN {
+    ctry_BODY {
       AT();
       t5h();
       assert(! "reached");
     }
-    try_CATCH(2) {
+    ctry_CATCH(2) {
       AT();
       catch = 2;
     }
-    try_FINALLY {
+    ctry_FINALLY {
       AT();
       finally = 1;
     }
-  } try_END;
+  } ctry_END;
   assert(catch == 2);
   assert(finally == 1);
   assert(t5h_catch == 0);
@@ -167,7 +167,7 @@ static void t5()
 
 
 static void *uncaught_data;
-static void uncaught(try_exc_t *exc, void *data)
+static void uncaught(ctry_exc_t *exc, void *data)
 {
   uncaught_data = data;  
 }
@@ -175,24 +175,24 @@ static void t6()
 {
   int body_end = 0, catch = 0, finally = 0;
 
-  try_thread_current()->uncaught = uncaught;
-  try_thread_current()->uncaught_data = t6;
+  ctry_thread_current()->uncaught = uncaught;
+  ctry_thread_current()->uncaught_data = t6;
 
-  try_BEGIN {
-    try_BODY {
+  ctry_BEGIN {
+    ctry_BODY {
       AT();
-      try_raise(1, 0);
+      ctry_raise(1, 0);
       assert(! "reached");
     }
-    try_CATCH(2) {
+    ctry_CATCH(2) {
       AT();
       catch = 2;
     }
-    try_FINALLY {
+    ctry_FINALLY {
       AT();
       finally = 1;
     }
-  } try_END;
+  } ctry_END;
   assert(catch == 0);
   assert(finally == 1);
   assert(uncaught_data == t6);
