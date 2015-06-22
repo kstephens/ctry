@@ -54,8 +54,8 @@ void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t);
 int  ctry_again__(ctry_CONTEXT_PARAMS ctry_t *t);
 ctry_exc_t *ctry_exc();
 
-#define ctry_raise(E, D)                                     \
-  ctry_raise__(ctry_CONTEXT_ARGS (E), (D))
+#define ctry_raise(E, ...)                      \
+  ctry_raise__(ctry_CONTEXT_ARGS (E), __VA_ARGS__)
 
 #define ctry_BEGIN_(N)                                       \
 do {                                                         \
