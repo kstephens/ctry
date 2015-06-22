@@ -212,6 +212,101 @@ static void test_catch_all_wo_raise()
 }
 
 
+static void test_raise_in_catch()
+{
+  int catch_1 = 0, catch_2 = 0, finally_1 = 0, finally_2 = 0;
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_BEGIN {
+        ctry_BODY {
+          ctry_raise(1, 0);
+          assert(! "reached");
+        }
+        ctry_CATCH(1) {
+          catch_1 ++;
+          ctry_raise(2, 0);
+          assert(! "reached");
+        }
+        ctry_FINALLY {
+          finally_1 ++;
+        }
+      } ctry_END;
+    }
+    ctry_CATCH(2) {
+      catch_2 ++;
+    }
+    ctry_FINALLY {
+      finally_2 ++;
+    }
+  } ctry_END;
+  assert(catch_1 == 1);
+  assert(catch_2 == 1);
+  assert(finally_1 == 1);
+  assert(finally_2 == 1);
+}
+
+static void test_raise_in_finally()
+{
+  int catch_1 = 0, catch_2 = 0, finally_1 = 0, finally_2 = 0;
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_BEGIN {
+        ctry_BODY {
+          ctry_raise(1, 0);
+          assert(! "reached");
+        }
+        ctry_CATCH(1) {
+          catch_1 ++;
+        }
+        ctry_FINALLY {
+          finally_1 ++;
+          ctry_raise(2, 0);
+          assert(! "reached");
+        }
+      } ctry_END;
+    }
+    ctry_CATCH(2) {
+      catch_2 ++;
+    }
+    ctry_FINALLY {
+      finally_2 ++;
+    }
+  } ctry_END;
+  assert(catch_1 == 1);
+  assert(catch_2 == 1);
+  assert(finally_1 == 1);
+  assert(finally_2 == 1);
+}
+
+static void test_raise_in_finally_wo_catch()
+{
+  int catch_2 = 0, finally_1 = 0, finally_2 = 0;
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_BEGIN {
+        ctry_BODY {
+          ctry_raise(1, 0);
+          assert(! "reached");
+        }
+        ctry_FINALLY {
+          finally_1 ++;
+          ctry_raise(2, 0);
+          assert(! "reached");
+        }
+      } ctry_END;
+    }
+    ctry_CATCH(2) {
+      catch_2 ++;
+    }
+    ctry_FINALLY {
+      finally_2 ++;
+    }
+  } ctry_END;
+  assert(catch_2 == 1);
+  assert(finally_1 == 1);
+  assert(finally_2 == 1);
+}
+
 #ifdef ctry_PTHREAD
 static int thr1_finally, thr2_finally;
 static void* thr1_f(void *data)
@@ -271,6 +366,9 @@ int main(int argc, char **argv)
   T(test_nested_w_2_finally);
   T(test_uncaught_exc_handler);
   T(test_catch_all_wo_raise);
+  T(test_raise_in_catch);
+  T(test_raise_in_finally);
+  T(test_raise_in_finally_wo_catch);
 #if ctry_PTHREAD
   T(test_pthread_isolation);
 #endif
