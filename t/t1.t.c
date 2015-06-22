@@ -10,7 +10,7 @@
 #define AT() printf("\n  at %s %s:%d\n", __FUNCTION__, __FILE__, __LINE__)
 // #define AT() (void) 0
 
-static void t1()
+static void test_body_wo_raise()
 {
   int body = 0, catch_1 = 0, catch_2 = 0;
 
@@ -31,7 +31,7 @@ static void t1()
   assert(catch_2 == 0);
 }
 
-static void t2()
+static void test_raise_w_catch()
 {
   int catch_1 = 0, catch_2 = 0;
 
@@ -52,7 +52,7 @@ static void t2()
   assert(catch_2 == 0);
 }
 
-static void t3h()
+static void nested_body()
 {
   ctry_BEGIN {
     ctry_BODY {
@@ -63,13 +63,13 @@ static void t3h()
   } ctry_END;
 }
 
-static void t3()
+static void test_raise_w_nested_body()
 {
   int catch_1 = 0, catch_2 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
-      t3h();
+      nested_body();
       assert(! "reached");
     }
     ctry_CATCH(1) {
@@ -85,8 +85,7 @@ static void t3()
 }
 
 
-static int t4h_catch_2;
-static void t4h()
+static void nested_catch_w_reraise_2(int *catch_2)
 {
   ctry_BEGIN {
     ctry_BODY {
@@ -94,20 +93,20 @@ static void t4h()
       assert(! "reached");
     }
     ctry_CATCH(2) {
-      t4h_catch_2 ++;
+      (*catch_2) ++;
       ctry_raise(1, 0);
       assert(! "reached");
     }
   } ctry_END;
 }
 
-static void t4()
+static void test_nested_catch_w_reraise()
 {
-  int catch_1 = 0;
+  int catch_1 = 0, catch_2 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
-      t4h();
+      nested_catch_w_reraise_2(&catch_2);
       assert(! "reached");
     }
     ctry_CATCH(1) {
@@ -115,70 +114,64 @@ static void t4()
     }
   } ctry_END;
 
-  assert(t4h_catch_2 == 1);
+  assert(catch_2 == 1);
   assert(catch_1 == 1);
 }
 
 
-static void t5t()
-{
-  ctry_raise(2, 0);
-  assert(! "reached");
-}
-
-static int t5h_catch_1, t5h_finally;
-static void t5h()
+static void t5h(int *catch_1, int *finally)
 {
   ctry_BEGIN {
     ctry_BODY {
-      t5t();
+      ctry_raise(2, 0);
+      assert(! "reached");
     }
     ctry_CATCH(1) {
-      t5h_catch_1 ++;
+      (*catch_1) ++;
     }
     ctry_FINALLY {
-      t5h_finally ++;
+      (*finally) ++;
     }
   } ctry_END;
 }
 
-static void t5()
+static void test_nested_w_2_finally()
 {
-  int catch_2 = 0, finally = 0;
+  int catch_1 = 0, catch_2 = 0, finally_1 = 0, finally_2 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
-      t5h();
+      t5h(&catch_1, &finally_2);
       assert(! "reached");
     }
     ctry_CATCH(2) {
       catch_2 ++;
     }
     ctry_FINALLY {
-      finally ++;
+      finally_1 ++;
     }
   } ctry_END;
   assert(catch_2 == 1);
-  assert(finally == 1);
-  assert(t5h_catch_1 == 0);
-  assert(t5h_finally == 1);
+  assert(finally_1 == 1);
+  assert(catch_1 == 0);
+  assert(finally_2 == 1);
 }
 
 
 static void *uncaught_data;
 static ctry_exc_t uncaught_exc;
-static void uncaught(ctry_exc_t *exc, void *data)
+static void uncaught_handler(ctry_exc_t *exc, void *data)
 {
   uncaught_exc = *exc;
   uncaught_data = data;  
 }
-static void t6()
+static void test_uncaught_exc_handler()
 {
   int catch_2 = 0, finally = 0;
   ctry_thread_t thr_save = *ctry_thread_current();
 
-  ctry_thread_current()->uncaught = uncaught;
-  ctry_thread_current()->uncaught_data = t6;
+  ctry_thread_current()->uncaught = uncaught_handler;
+  ctry_thread_current()->uncaught_data = &thr_save;
 
   ctry_BEGIN {
     ctry_BODY {
@@ -194,7 +187,7 @@ static void t6()
   } ctry_END;
   assert(catch_2 == 0);
   assert(finally == 1);
-  assert(uncaught_data == t6);
+  assert(uncaught_data == &thr_save);
   assert(uncaught_exc.e == 1);
   assert(uncaught_exc.data_n == 2);
   assert(uncaught_exc.data[0] == (void*) 1);
@@ -271,12 +264,12 @@ static void test_pthread_isolation()
 #define T(N) printf("%s %s ...\n", argv[0], #N); N (); printf("%s %s  OK\n", argv[0], #N)
 int main(int argc, char **argv)
 {
-  T(t1);
-  T(t2);
-  T(t3);
-  T(t4);
-  T(t5);
-  T(t6);
+  T(test_body_wo_raise);
+  T(test_raise_w_catch);
+  T(test_raise_w_nested_body);
+  T(test_nested_catch_w_reraise);
+  T(test_nested_w_2_finally);
+  T(test_uncaught_exc_handler);
   T(test_catch_all_wo_raise);
 #if ctry_PTHREAD
   T(test_pthread_isolation);
