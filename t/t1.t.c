@@ -12,27 +12,28 @@
 
 static void t1()
 {
-  int body = 0, catch = 0;
+  int body = 0, catch_1 = 0, catch_2 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
-      body = 1;
+      body ++;
     }
     ctry_CATCH(1) {
-      catch = 1;
+      catch_1 ++;
     }
     ctry_CATCH(2) {
-      catch = 2;
+      catch_2 ++;
     }
   } ctry_END;
 
   assert(body == 1);
-  assert(catch == 0);
+  assert(catch_1 == 0);
+  assert(catch_2 == 0);
 }
 
 static void t2()
 {
-  int caught = 0;
+  int catch_1 = 0, catch_2 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
@@ -40,14 +41,15 @@ static void t2()
       assert(! "reached");
     }
     ctry_CATCH(1) {
-      caught = 1;
+      catch_1 ++;
     }
     ctry_CATCH(2) {
-      caught = 2;
+      catch_2 ++;
     }
   } ctry_END;
 
-  assert(caught == 1);
+  assert(catch_1 == 1);
+  assert(catch_2 == 0);
 }
 
 static void t3h()
@@ -63,7 +65,7 @@ static void t3h()
 
 static void t3()
 {
-  int catch = 0;
+  int catch_1 = 0, catch_2 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
@@ -71,18 +73,19 @@ static void t3()
       assert(! "reached");
     }
     ctry_CATCH(1) {
-      catch = 1;
+      catch_1 ++;
     }
     ctry_CATCH_ANY {
-      catch = 2;
+      catch_2 ++;
     }
   } ctry_END;
 
-  assert(catch == 2);
+  assert(catch_1 == 0);
+  assert(catch_2 == 1);
 }
 
 
-static int t4h_caught;
+static int t4h_catch_2;
 static void t4h()
 {
   ctry_BEGIN {
@@ -91,7 +94,7 @@ static void t4h()
       assert(! "reached");
     }
     ctry_CATCH(2) {
-      t4h_caught = 2;
+      t4h_catch_2 ++;
       ctry_raise(1, 0);
       assert(! "reached");
     }
@@ -100,7 +103,7 @@ static void t4h()
 
 static void t4()
 {
-  int caught = 0;
+  int catch_1 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
@@ -108,12 +111,12 @@ static void t4()
       assert(! "reached");
     }
     ctry_CATCH(1) {
-      caught = 1;
+      catch_1 ++;
     }
   } ctry_END;
 
-  assert(t4h_caught == 2);
-  assert(caught == 1);
+  assert(t4h_catch_2 == 1);
+  assert(catch_1 == 1);
 }
 
 
@@ -123,7 +126,7 @@ static void t5t()
   assert(! "reached");
 }
 
-static int t5h_catch, t5h_finally;
+static int t5h_catch_1, t5h_finally;
 static void t5h()
 {
   ctry_BEGIN {
@@ -131,17 +134,17 @@ static void t5h()
       t5t();
     }
     ctry_CATCH(1) {
-      t5h_catch = 1;
+      t5h_catch_1 ++;
     }
     ctry_FINALLY {
-      t5h_finally = 1;
+      t5h_finally ++;
     }
   } ctry_END;
 }
 
 static void t5()
 {
-  int catch = 0, finally = 0;
+  int catch_2 = 0, finally = 0;
 
   ctry_BEGIN {
     ctry_BODY {
@@ -149,61 +152,70 @@ static void t5()
       assert(! "reached");
     }
     ctry_CATCH(2) {
-      catch = 2;
+      catch_2 ++;
     }
     ctry_FINALLY {
-      finally = 1;
+      finally ++;
     }
   } ctry_END;
-  assert(catch == 2);
+  assert(catch_2 == 1);
   assert(finally == 1);
-  assert(t5h_catch == 0);
+  assert(t5h_catch_1 == 0);
   assert(t5h_finally == 1);
 }
 
 
 static void *uncaught_data;
+static ctry_exc_t uncaught_exc;
 static void uncaught(ctry_exc_t *exc, void *data)
 {
+  uncaught_exc = *exc;
   uncaught_data = data;  
 }
 static void t6()
 {
-  int catch = 0, finally = 0;
+  int catch_2 = 0, finally = 0;
+  ctry_thread_t thr_save = *ctry_thread_current();
 
   ctry_thread_current()->uncaught = uncaught;
   ctry_thread_current()->uncaught_data = t6;
 
   ctry_BEGIN {
     ctry_BODY {
-      ctry_raise(1, 0);
+      ctry_raise(1, 2, (void*) 1, (void*) 2);
       assert(! "reached");
     }
     ctry_CATCH(2) {
-      catch = 2;
+      catch_2 ++;
     }
     ctry_FINALLY {
-      finally = 1;
+      finally ++;
     }
   } ctry_END;
-  assert(catch == 0);
+  assert(catch_2 == 0);
   assert(finally == 1);
   assert(uncaught_data == t6);
+  assert(uncaught_exc.e == 1);
+  assert(uncaught_exc.data_n == 2);
+  assert(uncaught_exc.data[0] == (void*) 1);
+  assert(uncaught_exc.data[1] == (void*) 2);
+  assert(uncaught_exc.data[2] == 0);
+  *ctry_thread_current() = thr_save;
 }
 
 static void test_catch_all_wo_raise()
 {
-  int catch = 0;
+  int catch_1 = 0;
 
   ctry_BEGIN {
     ctry_BODY {
     }
     ctry_CATCH_ANY {
-      catch = 1;
+      catch_1 ++;
     }
   } ctry_END;
 
-  assert(catch == 0);
+  assert(catch_1 == 0);
 }
 
 
@@ -216,7 +228,7 @@ static void* thr1_f(void *data)
       ctry_raise(1, 0);
     }
     ctry_FINALLY {
-      thr1_finally = 1;
+      thr1_finally ++;
     }
   } ctry_END;
   return thr1_f;
@@ -229,7 +241,7 @@ static void* thr2_f(void *data)
       ctry_raise(2, 0);
     }
     ctry_FINALLY {
-      thr2_finally = 1;
+      thr2_finally ++;
     }
   } ctry_END;
   return thr2_f;
