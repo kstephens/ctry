@@ -58,6 +58,9 @@ ctry_exc_t *ctry_exc();
 #define ctry_raise(CODE, ...)                      \
   ctry_raise__(ctry_CONTEXT_ARGS (CODE), __VA_ARGS__)
 
+#define ctry_RETURN_(N,X)                                    \
+  return (ctry_return__(ctry_CONTEXT_ARGS &_ctry_##N), (X))
+
 #define ctry_BEGIN_(N)                                       \
 do {                                                         \
   ctry_t _ctry_##N;                                          \
@@ -96,6 +99,7 @@ do {                                                         \
 #define ctry_CATCH_ANY ctry_CATCH_ANY_(_here)
 #define ctry_FINALLY   ctry_FINALLY_(_here)
 #define ctry_END       ctry_END_(_here)
+#define ctry_RETURN(X) ctry_RETURN_(_here, (X))
 
 #endif
 

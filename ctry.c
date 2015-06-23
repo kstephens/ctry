@@ -228,3 +228,9 @@ int ctry_again__(ctry_CONTEXT_PARAMS ctry_t *t)
   t->_again = 0;
   return again;
 }
+
+void ctry_return__(ctry_CONTEXT_PARAMS ctry_t *t)
+{
+  ctry_end__(ctry_CONTEXT_ARGS t);
+}
+
