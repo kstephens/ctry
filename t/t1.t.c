@@ -399,6 +399,7 @@ int main(int argc, char **argv)
 #if ctry_PTHREAD
   T(test_pthread_isolation);
 #endif
+  printf("%s ALL TESTS PASS\n", argv[0]);
   return 0;
 }
 

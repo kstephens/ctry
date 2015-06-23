@@ -68,9 +68,9 @@ do {                                                         \
     case 0:                                                  \
       ctry_body__(ctry_CONTEXT_ARGS &_ctry_##N);
 
-#define ctry_CATCH_(N,E)                                     \
+#define ctry_CATCH_(N,CODE)                                  \
     break;                                                   \
-    case E:                                                  \
+    case (CODE):                                             \
       ctry_catch__(ctry_CONTEXT_ARGS &_ctry_##N);
 
 #define ctry_CATCH_ANY_(N)                                   \
@@ -92,7 +92,7 @@ do {                                                         \
 
 #define ctry_BEGIN     ctry_BEGIN_(_here)
 #define ctry_BODY      ctry_BODY_(_here)
-#define ctry_CATCH(E)  ctry_CATCH_(_here, (E))
+#define ctry_CATCH(CODE)  ctry_CATCH_(_here, (CODE))
 #define ctry_CATCH_ANY ctry_CATCH_ANY_(_here)
 #define ctry_FINALLY   ctry_FINALLY_(_here)
 #define ctry_END       ctry_END_(_here)
