@@ -10,7 +10,7 @@ typedef struct ctry_context_t {
 } ctry_context_t;
 
 typedef struct ctry_exc_t {
-  int e;
+  int code;
   void *data[4];
   int data_n;
   ctry_context_t cntx;
@@ -47,15 +47,15 @@ ctry_thread_t *ctry_thread_current();
 #define ctry_CONTEXT_ARGS   __FILE__, __LINE__, __FUNCTION__,
 void ctry_begin__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_body__(ctry_CONTEXT_PARAMS ctry_t *t);
-void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...);
+void ctry_raise__(ctry_CONTEXT_PARAMS int code, int data_n, ...);
 void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_finally__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t);
 int  ctry_again__(ctry_CONTEXT_PARAMS ctry_t *t);
 ctry_exc_t *ctry_exc();
 
-#define ctry_raise(E, ...)                      \
-  ctry_raise__(ctry_CONTEXT_ARGS (E), __VA_ARGS__)
+#define ctry_raise(CODE, ...)                      \
+  ctry_raise__(ctry_CONTEXT_ARGS (CODE), __VA_ARGS__)
 
 #define ctry_BEGIN_(N)                                       \
 do {                                                         \

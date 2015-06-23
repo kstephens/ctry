@@ -187,7 +187,7 @@ static void test_uncaught_exc_handler()
   assert(catch_2 == 0);
   assert(finally == 1);
   assert(uncaught_data == &thr_save);
-  assert(uncaught_exc.e == 1);
+  assert(uncaught_exc.code == 1);
   assert(uncaught_exc.data_n == 2);
   assert(uncaught_exc.data[0] == (void*) 1);
   assert(uncaught_exc.data[1] == (void*) 2);
@@ -328,7 +328,7 @@ static void test_raise_in_finally_uncaught()
   } ctry_END;
   assert(finally_1 == 1);
   assert(uncaught_data == &thr_save);
-  assert(uncaught_exc.e == 2);
+  assert(uncaught_exc.code == 2);
 
   *ctry_thread_current() = thr_save;
 }

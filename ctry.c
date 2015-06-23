@@ -35,7 +35,7 @@ void ctry_uncaught_default(ctry_exc_t *exc, void *data)
   fflush(out);
   fprintf(out, "\n  ctry: thr %p: UNCAUGHT: %d: raised at %s:%d %s\n",
           thr,
-          (int) exc->e,
+          (int) exc->code,
           exc->cntx.file, exc->cntx.line, exc->cntx.func);
   fflush(out);
   ctry_abort();
@@ -115,7 +115,7 @@ void ctry_raise_exc(ctry_exc_t *exc)
 {
   ctry_t* t = ctry_thread_current()->curr;
   assert(exc);
-  assert(exc->e > 0);
+  assert(exc->code > 0);
   if ( ! t ) {
     ctry_thread_t *thr = ctry_thread_current();
     (thr->uncaught ? thr->uncaught : ctry_uncaught_default)(exc, thr->uncaught_data);
@@ -128,7 +128,7 @@ void ctry_raise_exc(ctry_exc_t *exc)
 
   t->_raise = 1;
   t->_raise_at = exc->cntx;
-  t->_state = t->_exc.e;
+  t->_state = t->_exc.code;
   t->_exc_pending = 1;
   longjmp(t->_jb, 1);
 }
@@ -149,13 +149,13 @@ void ctry_body__(ctry_CONTEXT_PARAMS ctry_t *t)
   ctry_SET_CONTEXT(_body_at);
 }
 
-void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...)
+void ctry_raise__(ctry_CONTEXT_PARAMS int code, int data_n, ...)
 {
   ctry_exc_t exc = { 0 };
-  assert(e > 0);
+  assert(code > 0);
   assert(data_n >= 0);
   assert(data_n < 4);
-  exc.e = e;
+  exc.code = code;
   ctry_SET_CONTEXT_(exc.cntx);
   exc.data_n = data_n;
   {
@@ -172,7 +172,7 @@ void ctry_raise__(ctry_CONTEXT_PARAMS int e, int data_n, ...)
 void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
-  assert(t->_exc.e > 0);
+  assert(t->_exc.code > 0);
   t->_catch = 1;
   ctry_SET_CONTEXT(_catch_at);
   t->_exc_pending = 0;
