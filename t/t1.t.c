@@ -333,6 +333,71 @@ static void test_raise_in_finally_uncaught()
   *ctry_thread_current() = thr_save;
 }
 
+static int test_return_f()
+{
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_RETURN(1);
+      assert(! "reached");
+    }
+    ctry_FINALLY {
+      assert(! "reached");
+    }
+  } ctry_END;
+
+  assert(! "reached");
+  return 0;
+}
+static void test_return()
+{
+  assert(test_return_f() == 1);
+}
+
+static int test_return_in_body_f()
+{
+  // NOTE: RETURN in BODY will not invoke FINALLY.
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_RETURN(1);
+      assert(! "reached");
+    }
+    ctry_FINALLY {
+      assert(! "reached");
+    }
+  } ctry_END;
+
+  assert(! "reached");
+  return 0;
+}
+static void test_return_in_body()
+{
+  assert(test_return_in_body_f() == 1);
+}
+
+static int test_return_in_catch_f()
+{
+  // NOTE: RETURN in CATCH will not invoke FINALLY.
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_raise(1, 0);
+      assert(! "reached");
+    }
+    ctry_CATCH(1) {
+      ctry_RETURN(1);
+    }
+    ctry_FINALLY {
+      assert(! "reached");
+    }
+  } ctry_END;
+
+  assert(! "reached");
+  return 0;
+}
+static void test_return_in_catch()
+{
+  assert(test_return_in_catch_f() == 1);
+}
+
 #ifdef ctry_PTHREAD
 static int thr1_finally, thr2_finally;
 static void* thr1_f(void *data)
@@ -396,6 +461,9 @@ int main(int argc, char **argv)
   T(test_raise_in_finally);
   T(test_raise_in_finally_wo_catch);
   T(test_raise_in_finally_uncaught);
+  T(test_return);
+  T(test_return_in_body);
+  T(test_return_in_catch);
 #if ctry_PTHREAD
   T(test_pthread_isolation);
 #endif
