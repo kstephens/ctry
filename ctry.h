@@ -19,7 +19,7 @@ typedef struct ctry_exc_t {
 typedef struct ctry_t {
   jmp_buf _jb;
   struct ctry_t *_prev;
-  int _state, _again;
+  int _state;
   unsigned int
     _begin   : 1,
     _body    : 1,
@@ -27,6 +27,7 @@ typedef struct ctry_t {
     _catch   : 1,
     _finally : 1,
     _end     : 1,
+    _again   : 1,
     _exc_pending : 1;
   ctry_exc_t _exc;
   ctry_context_t _begin_at, _body_at, _raise_at, _catch_at, _finally_at, _end_at;
@@ -62,7 +63,6 @@ do {                                                         \
   ctry_begin__(ctry_CONTEXT_ARGS &_ctry_##N);                \
   setjmp(_ctry_##N._jb);                                     \
   do {                                                       \
-    _ctry_##N._again = 0;                                    \
     switch ( _ctry_##N._state ) {
 #define ctry_BODY_(N)                                        \
     case 0:                                                  \

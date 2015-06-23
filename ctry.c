@@ -212,5 +212,7 @@ void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t)
 int ctry_again__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   ctry_do_finally(t);
-  return t->_again;
+  int again = t->_again;
+  t->_again = 0;
+  return again;
 }
