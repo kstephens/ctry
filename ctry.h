@@ -17,7 +17,6 @@ typedef struct ctry_exc_t {
 } ctry_exc_t;
 
 typedef struct ctry_t {
-  int _jmpcode;
   jmp_buf _jb;
   struct ctry_t *_prev;
   int _state, _again;
@@ -61,7 +60,7 @@ ctry_exc_t *ctry_exc();
 do {                                                         \
   ctry_t _ctry_##N;                                          \
   ctry_begin__(ctry_CONTEXT_ARGS &_ctry_##N);                \
-  _ctry_##N._jmpcode = setjmp(_ctry_##N._jb);                \
+  setjmp(_ctry_##N._jb);                                     \
   do {                                                       \
     _ctry_##N._again = 0;                                    \
     switch ( _ctry_##N._state ) {

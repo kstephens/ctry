@@ -103,7 +103,6 @@ void ctry_begin__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
   memset(t, 0, sizeof(*t));
-  t->_jmpcode = -1;
   t->_begin = 1;
   ctry_SET_CONTEXT(_begin_at);
   ctry_thread_t *thr = ctry_thread_current();
