@@ -121,6 +121,7 @@ void ctry_raise_exc(ctry_exc_t *exc)
     return;
   }
   assert(t->_begin == 1);
+  assert(t->_body  == 1);
   assert(t->_end   == 0);
 
   t->_exc = *exc;
@@ -197,6 +198,7 @@ void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
   assert(t->_begin == 1);
+  assert(t->_body  == 1);
   assert(t->_end   == 0);
   t->_end = 1;
   ctry_SET_CONTEXT(_end_at);
