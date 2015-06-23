@@ -135,6 +135,11 @@ void ctry_raise_exc(ctry_exc_t *exc)
 
 void ctry_do_finally(ctry_t *t)
 {
+  // If the FINALLY case has not been run,
+  // loop once more and run it, if
+  // it exists.
+  // Note: The break in CATCH_ANY default case
+  // will be run if there is no FINALLY case.
   if ( ! t->_finally ) {
     t->_finally = 1;
     t->_state = -1;
@@ -169,13 +174,18 @@ void ctry_raise__(ctry_CONTEXT_PARAMS int code, int data_n, ...)
   ctry_raise_exc(&exc);
 }
 
-void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t)
+int ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t)
 {
   assert(t);
+  // Do not jump into CATCH_ANY default case when
+  // there is no FINALLY case for _state == -1.
+  if ( t->_state == -1 )
+    return 1;
   assert(t->_exc.code > 0);
   t->_catch = 1;
   ctry_SET_CONTEXT(_catch_at);
   t->_exc_pending = 0;
+  return 0;
 }
 
 ctry_exc_t *ctry_exc()
@@ -203,6 +213,8 @@ void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t)
   t->_end = 1;
   ctry_SET_CONTEXT(_end_at);
   ctry_thread_current()->curr = t->_prev;
+  // If there is a pending (uncaught) exc,
+  // raise it in the parent ctry_BODY.
   if ( t->_exc_pending ) {
     t->_exc_pending = 0;
     ctry_raise_exc(&t->_exc);

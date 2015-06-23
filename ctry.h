@@ -48,7 +48,8 @@ ctry_thread_t *ctry_thread_current();
 void ctry_begin__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_body__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_raise__(ctry_CONTEXT_PARAMS int code, int data_n, ...);
-void ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t);
+void ctry_return__(ctry_CONTEXT_PARAMS ctry_t *t);;
+int  ctry_catch__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_finally__(ctry_CONTEXT_PARAMS ctry_t *t);
 void ctry_end__(ctry_CONTEXT_PARAMS ctry_t *t);
 int  ctry_again__(ctry_CONTEXT_PARAMS ctry_t *t);
@@ -76,8 +77,7 @@ do {                                                         \
 #define ctry_CATCH_ANY_(N)                                   \
     break;                                                   \
     default:                                                 \
-      if ( _ctry_##N._state == -1 ) break;                   \
-      ctry_catch__(ctry_CONTEXT_ARGS &_ctry_##N);
+      if ( ctry_catch__(ctry_CONTEXT_ARGS &_ctry_##N) ) break;
 
 #define ctry_FINALLY_(N)                                     \
     break;                                                   \
