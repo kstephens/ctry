@@ -169,7 +169,6 @@ static void test_uncaught_exc_handler()
 {
   int catch_2 = 0, finally = 0;
   ctry_thread_t thr_save = *ctry_thread_current();
-
   ctry_thread_current()->uncaught = uncaught_handler;
   ctry_thread_current()->uncaught_data = &thr_save;
 
@@ -193,6 +192,7 @@ static void test_uncaught_exc_handler()
   assert(uncaught_exc.data[0] == (void*) 1);
   assert(uncaught_exc.data[1] == (void*) 2);
   assert(uncaught_exc.data[2] == 0);
+
   *ctry_thread_current() = thr_save;
 }
 
@@ -281,6 +281,7 @@ static void test_raise_in_finally()
 static void test_raise_in_finally_wo_catch()
 {
   int catch_2 = 0, finally_1 = 0, finally_2 = 0;
+
   ctry_BEGIN {
     ctry_BODY {
       ctry_BEGIN {
@@ -305,6 +306,31 @@ static void test_raise_in_finally_wo_catch()
   assert(catch_2 == 1);
   assert(finally_1 == 1);
   assert(finally_2 == 1);
+}
+
+static void test_raise_in_finally_uncaught()
+{
+  int finally_1 = 0;
+  ctry_thread_t thr_save = *ctry_thread_current();
+  ctry_thread_current()->uncaught = uncaught_handler;
+  ctry_thread_current()->uncaught_data = &thr_save;
+
+  ctry_BEGIN {
+    ctry_BODY {
+      ctry_raise(1, 0);
+      assert(! "reached");
+    }
+    ctry_FINALLY {
+      finally_1 ++;
+      ctry_raise(2, 0);
+      assert(! "reached");
+    }
+  } ctry_END;
+  assert(finally_1 == 1);
+  assert(uncaught_data == &thr_save);
+  assert(uncaught_exc.e == 2);
+
+  *ctry_thread_current() = thr_save;
 }
 
 #ifdef ctry_PTHREAD
@@ -369,6 +395,7 @@ int main(int argc, char **argv)
   T(test_raise_in_catch);
   T(test_raise_in_finally);
   T(test_raise_in_finally_wo_catch);
+  T(test_raise_in_finally_uncaught);
 #if ctry_PTHREAD
   T(test_pthread_isolation);
 #endif
