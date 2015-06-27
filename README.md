@@ -1,8 +1,20 @@
 ctry
 ====
 
-A C library that provides try/catch/finally syntax.
-Uses ~setjmp()~ with ~ptheads~ support.
+A C library that provides `try`/`catch`/`finally` syntax.
+
+Features
+--------
+
+* Uses `setjmp()`.
+* Supports `pthreads`.
+* Does not use `malloc()`.
+
+Caveats
+-------
+
+* Probably not compatble with C++ exceptions.
+* Local flow-control, e.g. `break`, `continue`, `return`, `goto` outside of `crty_BEGIN`/`END` blocks may corrupt `ctry` dynamic block state.
 
 Examples
 --------
