@@ -9,6 +9,7 @@ Features
 * Uses `setjmp()`.
 * Supports `pthreads`.
 * Does not use `malloc()`.
+* Well-tested.
 
 Caveats
 -------
