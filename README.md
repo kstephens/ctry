@@ -8,7 +8,7 @@ Features
 
 * Uses `setjmp()`.
 * Supports `pthreads`.
-* Does not use `malloc()`.
+* Does not use `malloc()` (except for `pthread_getspecific()`).
 * Well-tested.
 
 Caveats
