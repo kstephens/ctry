@@ -15,7 +15,7 @@ Caveats
 -------
 
 * Probably not compatble with C++ exceptions.
-* Local flow-control, e.g. `break`, `continue`, `return`, `goto` outside of `crty_BEGIN`/`END` blocks may corrupt `ctry` dynamic block state.
+* Local flow-control, e.g. `break`, `continue`, `return`, `goto` in or out of `crty_BEGIN`/`END` blocks may corrupt `ctry` dynamic  state.
 
 Examples
 --------
@@ -31,7 +31,7 @@ static FILE* open_file(const char *path, const char *mode)
 {
   FILE *f;
   if ( ! (f = fopen(path, mode)) ) {
-    ctry_raise(errno, 3, path, mode);
+    ctry_raise(errno, 2, path, mode);
   }
   return f;
 }

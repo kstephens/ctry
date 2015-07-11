@@ -8,7 +8,7 @@ static FILE* open_file(const char *path, const char *mode)
 {
   FILE *f;
   if ( ! (f = fopen(path, mode)) ) {
-    ctry_raise(errno, 3, path, mode);
+    ctry_raise(errno, 2, path, mode);
   }
   return f;
 }
