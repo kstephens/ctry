@@ -1,26 +1,3 @@
-ctry
-====
-
-A C library that provides `try`/`catch`/`finally` syntax.
-
-Features
---------
-
-* Uses `setjmp()`.
-* Supports `pthreads`.
-* Does not use `malloc()` (except for `pthread_getspecific()`).
-* Well-tested.
-
-Caveats
--------
-
-* Probably not compatble with C++ exceptions.
-* Local flow-control, e.g. `break`, `continue`, `return`, `goto` outside of `crty_BEGIN`/`END` blocks may corrupt `ctry` dynamic block state.
-
-Examples
---------
-
-```C
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -60,4 +37,5 @@ int main(int argc, char **argv)
   assert(do_it() == 1);
   return 0;
 }
-```
+
+#include "ctry.c"

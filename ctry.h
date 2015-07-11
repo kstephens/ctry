@@ -11,9 +11,9 @@ typedef struct ctry_context_t {
 
 typedef struct ctry_exc_t {
   int code;
-  void *data[4];
-  int data_n;
   ctry_context_t cntx;
+  int data_n;
+  void *data[4];
 } ctry_exc_t;
 
 typedef struct ctry_t {
@@ -31,6 +31,7 @@ typedef struct ctry_t {
     _exc_pending : 1;
   ctry_exc_t _exc;
   ctry_context_t _begin_at, _body_at, _raise_at, _catch_at, _finally_at, _end_at;
+  void *unused[4];
 } ctry_t;
 
 typedef struct ctry_thread_t {
