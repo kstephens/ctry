@@ -37,7 +37,7 @@ FILE* open_file(const char *path)
 int main(int arg, char **argv)
 {
   ctry_BEGIN {
-    ctry_BLOCK {
+    ctry_BODY {
       FILE *f = open_file("non-existent.txt");
       char buf[1024] = { 0 };
       fread(buf, sizeof(buf[0]), sizeof(buf) - 1, f);
