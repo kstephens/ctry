@@ -14,9 +14,15 @@ Features
 Caveats
 -------
 
-* Probably not compatble with C++ exceptions.
+* Probably incompatble with C++ exceptions.
 * Local flow-control, e.g. `break`, `continue`, `return`, `goto` in or out of `crty_BEGIN`/`END` blocks may corrupt `ctry` dynamic  state.
 * `cry_RETURN` will not invoke `ctry_FINALLY` blocks, yet.
+
+
+License
+-------
+
+BSD
 
 Examples
 --------
